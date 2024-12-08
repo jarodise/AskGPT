@@ -57,10 +57,15 @@ local function showChatGPTDialog(ui, highlightedText, message_history)
   local title, author =
     ui.document:getProps().title or _("Unknown Title"),
     ui.document:getProps().authors or _("Unknown Author")
-  local message_history = message_history or {{
-    role = "system",
-    content = "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly. Answer as concisely as possible."
-  }}
+
+  -- Use custom default system prompt from configuration if available and no message history is provided
+  if not message_history then
+    local system_prompt = CONFIGURATION and CONFIGURATION.default_system_prompt or "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly. Answer as concisely as possible."
+    message_history = {{
+      role = "system",
+      content = system_prompt
+    }}
+  end
 
   local function handleNewQuestion(chatgpt_viewer, question)
     table.insert(message_history, {
@@ -92,39 +97,63 @@ local function showChatGPTDialog(ui, highlightedText, message_history)
       callback = function()
         local question = input_dialog:getInputText()
         UIManager:close(input_dialog)
-        showLoadingDialog()
-
-        UIManager:scheduleIn(0.1, function()
-          local context_message = {
-            role = "user",
-            content = "I'm reading something titled '" .. title .. "' by " .. author ..
-              ". I have a question about the following highlighted text: " .. highlightedText
-          }
-          table.insert(message_history, context_message)
-
-          local question_message = {
-            role = "user",
-            content = question
-          }
-          table.insert(message_history, question_message)
-
-          local answer = queryChatGPT(message_history)
-          local answer_message = {
-            role = "assistant",
-            content = answer
-          }
-          table.insert(message_history, answer_message)
-
+        
+        if not question or question == "" then
+          -- If no question is entered, just show the ChatGPT viewer with the initial message history
           local result_text = createResultText(highlightedText, message_history)
-
           local chatgpt_viewer = ChatGPTViewer:new {
             title = _("AskGPT"),
             text = result_text,
             onAskQuestion = handleNewQuestion
           }
-
           UIManager:show(chatgpt_viewer)
-        end)
+        else
+          showLoadingDialog()
+
+          UIManager:scheduleIn(0.1, function()
+            local context_message = {
+              role = "user",
+              content = "I'm reading something titled '" .. title .. "' by " .. author ..
+                ". I have a question about the following highlighted text: " .. highlightedText
+            }
+            table.insert(message_history, context_message)
+
+            local question_message = {
+              role = "user",
+              content = question
+            }
+            table.insert(message_history, question_message)
+
+            local answer
+            pcall(function()
+              answer = queryChatGPT(message_history)
+            end)
+
+            if answer then
+              local answer_message = {
+                role = "assistant",
+                content = answer
+              }
+              table.insert(message_history, answer_message)
+
+              local result_text = createResultText(highlightedText, message_history)
+
+              local chatgpt_viewer = ChatGPTViewer:new {
+                title = _("AskGPT"),
+                text = result_text,
+                onAskQuestion = handleNewQuestion
+              }
+
+              UIManager:show(chatgpt_viewer)
+            else
+              UIManager:close(loading)
+              UIManager:show(InfoMessage:new{
+                text = _("Error querying ChatGPT. Please check your configuration and try again."),
+                timeout = 5
+              })
+            end
+          end)
+        end
       end
     }
   }
