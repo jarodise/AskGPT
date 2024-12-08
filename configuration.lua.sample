@@ -1,8 +1,9 @@
 local CONFIGURATION = {
-    api_key = "YOUR_API_KEY",
-    model = "gpt-4o-mini",
-    base_url = "https://api.openai.com/v1/chat/completions",
+    api_key = "your-api-key",
+    model = "yi-lightning",
+    base_url = "https://api.lingyiwanwu.com/v1/chat/completions",
     additional_parameters = {},
+    default_system_prompt = "translate to spanish"
 }
 
 return CONFIGURATION
