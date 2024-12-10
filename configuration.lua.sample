@@ -1,9 +1,20 @@
 local CONFIGURATION = {
-    api_key = "your-api-key",
-    model = "yi-lightning",
-    base_url = "https://api.lingyiwanwu.com/v1/chat/completions",
-    additional_parameters = {},
-    default_system_prompt = "translate to spanish"
+  -- Replace with your actual OpenAI API key
+  api_key = "your-api-key",
+
+  -- Replace with your choice of model
+  model = "yi-lightning",
+
+  -- API endpoint (you can change it to a proxy if needed)
+  api_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions",
+
+  -- Default system prompt used when asking ChatGPT a question
+  -- It can be overridden by setting a custom prompt in the plugin settings
+  prompt1 = "translate to Spanish.",
+
+  -- Default system prompt used when asking ChatGPT a question
+  -- It can be overridden by setting a custom prompt in the plugin settings
+  prompt2 = "translate to Chinese.",
 }
 
 return CONFIGURATION

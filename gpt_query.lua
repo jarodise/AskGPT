@@ -26,7 +26,7 @@ local json = require("json")
 local function queryChatGPT(message_history)
   -- Use api_key from CONFIGURATION or fallback to the api_key module
   local api_key_value = CONFIGURATION and CONFIGURATION.api_key or api_key
-  local api_url = CONFIGURATION and CONFIGURATION.base_url or "https://api.openai.com/v1/chat/completions"
+  local api_url = CONFIGURATION and CONFIGURATION.api_endpoint or "https://api.openai.com/v1/chat/completions"
   local model = CONFIGURATION and CONFIGURATION.model or "gpt-4o-mini"
 
   -- Determine whether to use http or https
