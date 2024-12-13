@@ -23,35 +23,98 @@ local http = require("socket.http")
 local ltn12 = require("ltn12")
 local json = require("json")
 
+local function isGeminiEndpoint(url)
+  return url:match("generativelanguage%.googleapis%.com") ~= nil
+end
+
+local function formatGeminiRequest(message_history)
+  -- Find system prompt and last user message
+  local systemPrompt = ""
+  local userContent = ""
+  
+  for _, msg in ipairs(message_history) do
+    if msg.role == "system" then
+      systemPrompt = msg.content
+    elseif msg.role == "user" then
+      userContent = msg.content
+    end
+  end
+
+  -- Combine system prompt with user content
+  local combinedPrompt = ""
+  if systemPrompt ~= "" then
+    combinedPrompt = "Instructions: " .. systemPrompt .. "\n\nText: " .. userContent
+  else
+    combinedPrompt = userContent
+  end
+
+  return {
+    contents = {
+      {
+        parts = {
+          { text = combinedPrompt }
+        }
+      }
+    }
+  }
+end
+
+local function formatOpenAIRequest(message_history, model)
+  return {
+    model = model,
+    messages = message_history
+  }
+end
+
+local function parseGeminiResponse(response)
+  if response.candidates and response.candidates[1] and response.candidates[1].content then
+    return response.candidates[1].content.parts[1].text
+  end
+  error("Invalid Gemini response format: " .. json.encode(response))
+end
+
+local function parseOpenAIResponse(response)
+  if response.choices and response.choices[1] and response.choices[1].message then
+    return response.choices[1].message.content
+  end
+  error("Invalid OpenAI response format: " .. json.encode(response))
+end
+
 local function queryChatGPT(message_history)
   -- Use api_key from CONFIGURATION or fallback to the api_key module
   local api_key_value = CONFIGURATION and CONFIGURATION.api_key or api_key
   local api_url = CONFIGURATION and CONFIGURATION.api_endpoint or "https://api.openai.com/v1/chat/completions"
-  local model = CONFIGURATION and CONFIGURATION.model or "gpt-4o-mini"
+  local model = CONFIGURATION and CONFIGURATION.model or "gpt-4-mini"
 
   -- Determine whether to use http or https
   local request_library = api_url:match("^https://") and https or http
 
-  -- Start building the request body
-  local requestBodyTable = {
-    model = model,
-    messages = message_history,
-  }
-
-  -- Add additional parameters if they exist
-  if CONFIGURATION and CONFIGURATION.additional_parameters then
-    for key, value in pairs(CONFIGURATION.additional_parameters) do
-      requestBodyTable[key] = value
-    end
+  -- Determine if we're using Gemini API
+  local isGemini = isGeminiEndpoint(api_url)
+  
+  -- Format request body based on API type
+  local requestBodyTable
+  if isGemini then
+    requestBodyTable = formatGeminiRequest(message_history)
+  else
+    requestBodyTable = formatOpenAIRequest(message_history, model)
   end
 
   -- Encode the request body as JSON
   local requestBody = json.encode(requestBodyTable)
 
+  -- Set up headers based on API type
   local headers = {
     ["Content-Type"] = "application/json",
-    ["Authorization"] = "Bearer " .. api_key_value,
   }
+  
+  if isGemini then
+    -- For Gemini, append the API key as a URL parameter
+    api_url = api_url .. "?key=" .. api_key_value
+  else
+    -- For OpenAI and compatible APIs, use Bearer token
+    headers["Authorization"] = "Bearer " .. api_key_value
+  end
 
   local responseBody = {}
 
@@ -65,11 +128,18 @@ local function queryChatGPT(message_history)
   }
 
   if code ~= 200 then
-    error("Error querying ChatGPT API: " .. code)
+    local errorResponse = table.concat(responseBody)
+    error(string.format("Error querying API (Code %d): %s", code, errorResponse))
   end
 
   local response = json.decode(table.concat(responseBody))
-  return response.choices[1].message.content
+  
+  -- Parse response based on API type
+  if isGemini then
+    return parseGeminiResponse(response)
+  else
+    return parseOpenAIResponse(response)
+  end
 end
 
 return queryChatGPT

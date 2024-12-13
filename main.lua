@@ -67,23 +67,23 @@ function AskGPT:handlePrompt(prompt_number, _reader_highlight_instance)
       { role = "user", content = highlightedText }
     }
 
-    local answer
-    pcall(function()
+    local answer, error_msg
+    success, error_msg = pcall(function()
       answer = queryChatGPT(message_history)
     end)
 
-    if answer then
+    if success and answer then
       table.insert(message_history, { role = "assistant", content = answer })
 
       Device.input.setClipboardText(answer)
-      UIManager:show(Notification:new{ text = _("ChatGPT response copied to clipboard."), timeout = 3 })
+      UIManager:show(Notification:new{ text = _("AI response copied to clipboard."), timeout = 3 })
 
       local result_text = ""
       for i = 1, #message_history do
         if message_history[i].role == "user" then
           result_text = result_text .. _("User: ") .. message_history[i].content .. "\n\n"
         else
-          result_text = result_text .. _("ChatGPT: ") .. message_history[i].content .. "\n\n"
+          result_text = result_text .. _("Assistant: ") .. message_history[i].content .. "\n\n"
         end
       end
 
@@ -93,36 +93,38 @@ function AskGPT:handlePrompt(prompt_number, _reader_highlight_instance)
         onAskQuestion = function(chatgpt_viewer, question)
           table.insert(message_history, { role = "user", content = question })
 
-          local answer
-          pcall(function()
+          local answer, error_msg
+          success, error_msg = pcall(function()
             answer = queryChatGPT(message_history)
           end)
 
-          if answer then
+          if success and answer then
             table.insert(message_history, { role = "assistant", content = answer })
 
             Device.input.setClipboardText(answer)
-            UIManager:show(Notification:new{ text = _("ChatGPT response copied to clipboard."), timeout = 3 })
+            UIManager:show(Notification:new{ text = _("AI response copied to clipboard."), timeout = 3 })
 
             local result_text = ""
             for i = 1, #message_history do
               if message_history[i].role == "user" then
                 result_text = result_text .. _("User: ") .. message_history[i].content .. "\n\n"
               else
-                result_text = result_text .. _("ChatGPT: ") .. message_history[i].content .. "\n\n"
+                result_text = result_text .. _("Assistant: ") .. message_history[i].content .. "\n\n"
               end
             end
 
             chatgpt_viewer:update(result_text)
           else
-            UIManager:show(InfoMessage:new{ text = _("Error querying ChatGPT. Please check your configuration and try again."), timeout = 5 })
+            local error_text = error_msg and tostring(error_msg) or "Unknown error occurred"
+            UIManager:show(InfoMessage:new{ text = _("Error querying AI: " .. error_text), timeout = 5 })
           end
         end
       }
 
       UIManager:show(chatgpt_viewer)
     else
-      UIManager:show(InfoMessage:new{ text = _("Error querying ChatGPT. Please check your configuration and try again."), timeout = 5 })
+      local error_text = error_msg and tostring(error_msg) or "Unknown error occurred"
+      UIManager:show(InfoMessage:new{ text = _("Error querying AI: " .. error_text), timeout = 5 })
     end
   end)
 end
