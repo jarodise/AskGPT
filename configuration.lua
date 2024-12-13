@@ -1,6 +1,6 @@
 local CONFIGURATION = {
   -- Replace with your actual API key
-  api_key = "AIzaSyCmmdUR1k_fQOZYm0-Wopz54NdTeHU4icU",
+  api_key = "your-api-key",
 
   -- Replace with your choice of model
   model = "gemini-2.0-flash-exp",
