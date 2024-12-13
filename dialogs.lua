@@ -38,7 +38,7 @@ local function createResultText(highlightedText, message_history)
     if message_history[i].role == "user" then
       result_text = result_text .. _("User: ") .. message_history[i].content .. "\n\n"
     else
-      result_text = result_text .. _("ChatGPT: ") .. message_history[i].content .. "\n\n"
+      result_text = result_text .. _("Assistant: ") .. message_history[i].content .. "\n\n"
     end
   end
 
@@ -68,9 +68,12 @@ local function showChatGPTDialog(ui, highlightedText, message_history)
   end
 
   local function handleNewQuestion(chatgpt_viewer, question)
+    -- For follow-up questions, include the context of the highlighted text
+    local contextual_question = "Regarding the text: \"" .. highlightedText .. "\"\n\nQuestion: " .. question
+    
     table.insert(message_history, {
       role = "user",
-      content = question
+      content = contextual_question
     })
 
     local answer = queryChatGPT(message_history)
@@ -111,18 +114,18 @@ local function showChatGPTDialog(ui, highlightedText, message_history)
           showLoadingDialog()
 
           UIManager:scheduleIn(0.1, function()
-            local context_message = {
+            -- Combine the context and question into a single message
+            local combined_message = {
               role = "user",
-              content = "I'm reading something titled '" .. title .. "' by " .. author ..
-                ". I have a question about the following highlighted text: " .. highlightedText
+              content = string.format(
+                "Context: I'm reading \"%s\" by %s.\n\nText: \"%s\"\n\nQuestion: %s",
+                title,
+                author,
+                highlightedText,
+                question
+              )
             }
-            table.insert(message_history, context_message)
-
-            local question_message = {
-              role = "user",
-              content = question
-            }
-            table.insert(message_history, question_message)
+            table.insert(message_history, combined_message)
 
             local answer
             pcall(function()
@@ -148,7 +151,7 @@ local function showChatGPTDialog(ui, highlightedText, message_history)
             else
               UIManager:close(loading)
               UIManager:show(InfoMessage:new{
-                text = _("Error querying ChatGPT. Please check your configuration and try again."),
+                text = _("Error querying AI. Please check your configuration and try again."),
                 timeout = 5
               })
             end

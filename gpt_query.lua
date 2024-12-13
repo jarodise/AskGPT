@@ -28,25 +28,26 @@ local function isGeminiEndpoint(url)
 end
 
 local function formatGeminiRequest(message_history)
-  -- Find system prompt and last user message
+  -- Find system prompt and combine user messages
   local systemPrompt = ""
-  local userContent = ""
+  local userContent = {}
   
   for _, msg in ipairs(message_history) do
     if msg.role == "system" then
       systemPrompt = msg.content
     elseif msg.role == "user" then
-      userContent = msg.content
+      table.insert(userContent, msg.content)
     end
   end
 
-  -- Combine system prompt with user content
+  -- Combine all user content with proper context
   local combinedPrompt = ""
   if systemPrompt ~= "" then
-    combinedPrompt = "Instructions: " .. systemPrompt .. "\n\nText: " .. userContent
-  else
-    combinedPrompt = userContent
+    combinedPrompt = "Instructions: " .. systemPrompt .. "\n\n"
   end
+  
+  -- Join all user messages with proper context
+  combinedPrompt = combinedPrompt .. table.concat(userContent, "\n\nFollow-up: ")
 
   return {
     contents = {
