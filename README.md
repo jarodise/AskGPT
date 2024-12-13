@@ -14,9 +14,10 @@ This plugin allows you to integrate various LLM services (OpenAI, Google Gemini,
 ## Installation
 
 1. Make sure you have KOReader installed on your device.
-2. Copy the `askgpt` folder to your KOReader plugins directory (`koreader/plugins/`).
-3. Restart KOReader.
-4. Configuration setup: use your favorite text editor to open the configuration.lua file and configure:
+2. Clone/Download this repo, upzip it and rename the folder "askgpt.koplugin".
+3. Copy the `askgpt.koplugin` folder to your KOReader plugins directory (`koreader/plugins/`).
+4. Restart KOReader.
+5. Configuration setup: use your favorite text editor to open the configuration.lua file and configure:
    - API endpoint (OpenAI or Gemini)
    - API key
    - Model name
