@@ -38,6 +38,36 @@ function AskGPT:init()
       end,
     }
   end)
+
+  self.ui.highlight:addToHighlightDialog("askgpt_ChatGPT_Prompt3", function(_reader_highlight_instance)
+    return {
+      text = _("Prompt 3"),
+      enabled = Device:hasClipboard(),
+      callback = function()
+        self:handlePrompt(3, _reader_highlight_instance)
+      end,
+    }
+  end)
+
+  self.ui.highlight:addToHighlightDialog("askgpt_ChatGPT_Custom", function(_reader_highlight_instance)
+    return {
+      text = _("Ask AI"),
+      enabled = Device:hasClipboard(),
+      callback = function()
+        self:handleCustomPrompt(_reader_highlight_instance)
+      end,
+    }
+  end)
+end
+
+function AskGPT:handleCustomPrompt(_reader_highlight_instance)
+  NetworkMgr:runWhenOnline(function()
+    if not updateMessageShown then
+      UpdateChecker.checkForUpdates()
+      updateMessageShown = true
+    end
+    showChatGPTDialog(self.ui, _reader_highlight_instance.selected_text.text)
+  end)
 end
 
 function AskGPT:handlePrompt(prompt_number, _reader_highlight_instance)
@@ -59,6 +89,8 @@ function AskGPT:handlePrompt(prompt_number, _reader_highlight_instance)
       system_prompt = CONFIGURATION and CONFIGURATION.prompt1 or "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly. Answer as concisely as possible."
     elseif prompt_number == 2 then
       system_prompt = CONFIGURATION and CONFIGURATION.prompt2 or "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly. Answer as concisely as possible."
+    elseif prompt_number == 3 then
+      system_prompt = CONFIGURATION and CONFIGURATION.prompt3 or "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly. Answer as concisely as possible."
     end
 
     local highlightedText = _reader_highlight_instance.selected_text.text

@@ -15,6 +15,10 @@ local CONFIGURATION = {
   -- Default system prompt used when asking ChatGPT a question
   -- It can be overridden by setting a custom prompt in the plugin settings
   prompt2 = "translate to Chinese.",
+
+  -- Default system prompt used when asking ChatGPT a question
+  -- It can be overridden by setting a custom prompt in the plugin settings
+  prompt3 = "explain this text in detail.",
 }
 
 return CONFIGURATION
