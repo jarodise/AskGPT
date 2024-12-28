@@ -6,7 +6,7 @@ This plugin allows you to integrate various LLM services (OpenAI, Google Gemini,
 
 - Three predefined system prompts for quick access
 - Custom prompt input for flexible interactions
-- Copy AI responses to the clipboard
+- Save AI responses directly as notes for highlighted text
 - Configure custom system prompts for different contexts
 - Support for multiple LLM providers (OpenAI, Google Gemini)
 - Translate highlighted text to a specified language (if enabled in configuration)
@@ -49,8 +49,10 @@ model = "gemini-2.0-flash-exp"
 
 ### Using Predefined Prompts (1, 2, 3)
 - Simply tap the prompt button and the AI will process your highlighted text according to the predefined instruction in configuration.lua
-- The response will be automatically copied to clipboard
-- You can continue the conversation with follow-up questions
+- The response will appear in a viewer where you can:
+  - Read the full conversation
+  - Save the response as a note for the highlighted text
+  - Ask follow-up questions
 
 ### Using Custom Prompts (Ask AI)
 1. Tap "Ask AI" in the menu
@@ -58,14 +60,19 @@ model = "gemini-2.0-flash-exp"
 3. Tap "Ask" to get the response
 4. The response will show in a viewer where you can:
    - Read the full conversation history
+   - Save the response as a note for the highlighted text
    - Ask follow-up questions
-   - Copy responses to clipboard
+
+### Saving Responses as Notes
+- When viewing an AI response, tap "Save as note" to save it as a note for the highlighted text
+- The note will be automatically saved and the viewer will close
+- You can view saved notes using KOReader's standard note viewing features
 
 ### Tips
-- Responses are automatically copied to your clipboard
 - You can maintain a conversation thread with follow-up questions
 - The AI considers the document's context (title and author) when responding
 - Error messages will help you identify any configuration or connection issues
+- Notes are saved directly to the document, making them easily accessible for future reference
 
 ## License
 
