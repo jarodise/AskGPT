@@ -458,13 +458,7 @@ function ChatGPTViewer:handleTextSelection(text, hold_duration, start_idx, end_i
     self.text_selection_callback(text, hold_duration, start_idx, end_idx, to_source_index_func)
     return
   end
-  if Device:hasClipboard() then
-    Device.input.setClipboardText(text)
-    UIManager:show(Notification:new {
-      text = start_idx == end_idx and _("Word copied to clipboard.")
-          or _("Selection copied to clipboard."),
-    })
-  end
+  -- Removed clipboard functionality since we're using direct note saving
 end
 
 function ChatGPTViewer:update(new_text, new_response)

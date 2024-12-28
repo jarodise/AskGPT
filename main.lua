@@ -22,7 +22,7 @@ function AskGPT:init()
   self.ui.highlight:addToHighlightDialog("askgpt_ChatGPT_Prompt1", function(_reader_highlight_instance)
     return {
       text = _("Prompt 1"),
-      enabled = Device:hasClipboard(),
+      enabled = true,
       callback = function()
         self:handlePrompt(1, _reader_highlight_instance)
       end,
@@ -32,7 +32,7 @@ function AskGPT:init()
   self.ui.highlight:addToHighlightDialog("askgpt_ChatGPT_Prompt2", function(_reader_highlight_instance)
     return {
       text = _("Prompt 2"),
-      enabled = Device:hasClipboard(),
+      enabled = true,
       callback = function()
         self:handlePrompt(2, _reader_highlight_instance)
       end,
@@ -42,7 +42,7 @@ function AskGPT:init()
   self.ui.highlight:addToHighlightDialog("askgpt_ChatGPT_Prompt3", function(_reader_highlight_instance)
     return {
       text = _("Prompt 3"),
-      enabled = Device:hasClipboard(),
+      enabled = true,
       callback = function()
         self:handlePrompt(3, _reader_highlight_instance)
       end,
@@ -52,7 +52,7 @@ function AskGPT:init()
   self.ui.highlight:addToHighlightDialog("askgpt_ChatGPT_Custom", function(_reader_highlight_instance)
     return {
       text = _("Ask AI"),
-      enabled = Device:hasClipboard(),
+      enabled = true,
       callback = function()
         self:handleCustomPrompt(_reader_highlight_instance)
       end,
@@ -107,9 +107,6 @@ function AskGPT:handlePrompt(prompt_number, _reader_highlight_instance)
     if success and answer then
       table.insert(message_history, { role = "assistant", content = answer })
 
-      Device.input.setClipboardText(answer)
-      UIManager:show(Notification:new{ text = _("AI response copied to clipboard."), timeout = 3 })
-
       local result_text = ""
       for i = 1, #message_history do
         if message_history[i].role == "user" then
@@ -134,9 +131,6 @@ function AskGPT:handlePrompt(prompt_number, _reader_highlight_instance)
 
           if success and answer then
             table.insert(message_history, { role = "assistant", content = answer })
-
-            Device.input.setClipboardText(answer)
-            UIManager:show(Notification:new{ text = _("AI response copied to clipboard."), timeout = 3 })
 
             local result_text = ""
             for i = 1, #message_history do
