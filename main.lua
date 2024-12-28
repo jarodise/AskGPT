@@ -122,6 +122,8 @@ function AskGPT:handlePrompt(prompt_number, _reader_highlight_instance)
       local chatgpt_viewer = ChatGPTViewer:new{
         title = _("AskGPT"),
         text = result_text,
+        reader_highlight_instance = _reader_highlight_instance,
+        latest_response = answer,  -- Pass the latest GPT response
         onAskQuestion = function(chatgpt_viewer, question)
           table.insert(message_history, { role = "user", content = question })
 
@@ -145,7 +147,7 @@ function AskGPT:handlePrompt(prompt_number, _reader_highlight_instance)
               end
             end
 
-            chatgpt_viewer:update(result_text)
+            chatgpt_viewer:update(result_text, answer)  -- Pass the latest response when updating
           else
             local error_text = error_msg and tostring(error_msg) or "Unknown error occurred"
             UIManager:show(InfoMessage:new{ text = _("Error querying AI: " .. error_text), timeout = 5 })

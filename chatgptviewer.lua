@@ -39,6 +39,8 @@ local ChatGPTViewer = InputContainer:extend {
   width = nil,
   height = nil,
   buttons_table = nil,
+  reader_highlight_instance = nil,  -- Added to store the highlight instance
+  latest_response = nil,  -- Store the latest GPT response
   -- See TextBoxWidget for details about these options
   -- We default to justified and auto_para_direction to adapt
   -- to any kind of text we are given (book descriptions,
@@ -188,6 +190,15 @@ function ChatGPTViewer:init()
   -- buttons
   local default_buttons =
   {
+    {
+      text = _("Save as note"),
+      id = "save_as_note",
+      callback = function()
+        if self.reader_highlight_instance and self.latest_response then
+          self.reader_highlight_instance:addNote(self.latest_response)
+        end
+      end,
+    },
     {
       text = _("Ask Another Question"),
       id = "ask_another_question",
@@ -455,7 +466,7 @@ function ChatGPTViewer:handleTextSelection(text, hold_duration, start_idx, end_i
   end
 end
 
-function ChatGPTViewer:update(new_text)
+function ChatGPTViewer:update(new_text, new_response)
   UIManager:close(self)
   local updated_viewer = ChatGPTViewer:new {
     title = self.title,
@@ -464,6 +475,8 @@ function ChatGPTViewer:update(new_text)
     height = self.height,
     buttons_table = self.buttons_table,
     onAskQuestion = self.onAskQuestion,
+    reader_highlight_instance = self.reader_highlight_instance,  -- Preserve the highlight instance
+    latest_response = new_response or self.latest_response,  -- Use new response if provided
   }
   updated_viewer.scroll_text_w:scrollToBottom()
   UIManager:show(updated_viewer)
