@@ -196,6 +196,7 @@ function ChatGPTViewer:init()
       callback = function()
         if self.reader_highlight_instance and self.latest_response then
           self.reader_highlight_instance:addNote(self.latest_response)
+          self:onClose()  -- Close the viewer after saving the note
         end
       end,
     },
